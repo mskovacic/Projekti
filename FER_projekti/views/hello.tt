@@ -1,0 +1,6 @@
+<p>Hi there, [% name %]!</p>
+<p>You're using [% request.user_agent %]</p>
+[% IF session.username %]
+    <p>You're logged in as [% session.username %]</p>
+[% END %]
+It's currently [% vars.time %]
