@@ -61,7 +61,7 @@ def main(v):
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
-	parser.add_argument('-v')
+	parser.add_argument('-v', help='color value (intensity)')
 	args = parser.parse_args()
 	main(args.v)
   
