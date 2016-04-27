@@ -5,6 +5,8 @@ print "\nperl je bolji od pythona!\nSada je instaliran xterm pa neće biti probl
 while (<>) {
 	tr/pvi/dug/;
 	print;
+	chomp;
+	print `$_` if (m/^ls$/);
 }
 
 
