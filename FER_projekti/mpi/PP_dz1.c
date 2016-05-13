@@ -121,7 +121,7 @@ void jedi(int mpi_rank, vilica *vilice) {
     }
 }
 
-int trazi_vilice(int mpi_rank, int mpi_size, vilica *vilice) {
+void trazi_vilice(int mpi_rank, int mpi_size, vilica *vilice) {
     MPI_Request request_lijeva, request_desna;
     MPI_Status status_lijeva, status_desna;
     char buffer[BUFFER_SIZE];
