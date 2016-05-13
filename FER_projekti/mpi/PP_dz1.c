@@ -59,7 +59,6 @@ int main(int argc, char **argv) {
     podijeli_vilice(mpi_rank, mpi_size, vilice);
 
     while (1) {
-    	//printf("%d, %s, %d\n", mpi_rank, processor_name, rand());
 	misli(mpi_rank, vilice);
 	trazi_vilice(mpi_rank, mpi_size, vilice);
 	jedi(mpi_rank, vilice);
