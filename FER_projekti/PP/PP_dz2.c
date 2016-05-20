@@ -4,11 +4,12 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
-//#include <error.h>
+#include <ncurses.h>
 
 #define BUFFER_SIZE 10
 
 void Inicijaliziraj(int *argc, char ***argv, int *mpi_rank, int *mpi_size, char *processor_name);
+void RenderBoard(WINDOW **polja);
 void Obradi_rezultat(int code);
 int Iprobe(MPI_Status *status);
 void Recv(void *buf, MPI_Status *status);
@@ -17,15 +18,36 @@ void Isend(const void *buf, int dest, MPI_Request *request);
 void Irecv(void *buf, MPI_Request *request);
 void Wait(MPI_Request *request, MPI_Status *status);
 
-
 int main(int argc, char **argv) {
-    int i, mpi_rank, mpi_size;
+    int i, j, mpi_rank, mpi_size, key;
     char processor_name[MPI_MAX_PROCESSOR_NAME];
+    WINDOW *polja[42];
 
     Inicijaliziraj(&argc, &argv, &mpi_rank, &mpi_size, processor_name);
+    /*
+    for (i=0; i<6; i++)
+        for (j=0; j<7; j++) {
+            polja[i+6*j] = newwin(10, 10, 10+10*i, 10+10*j);
+        }
+    */
 
-    printf("Uspješno pokrenut!\n");
+    RenderBoard(polja);
 
+    while ((key=getch()) != KEY_F(1)) {
+        move(0,0);
+        clear();
+        refresh();
+        switch (key) {
+            case KEY_UP:
+                break;
+            case KEY_DOWN:
+                break;
+            default:
+                refresh;
+        }
+        RenderBoard(polja);
+    }
+    endwin();
     MPI_Finalize();
     return 0;
 }
@@ -47,6 +69,23 @@ void Inicijaliziraj(int *argc, char ***argv, int *mpi_rank, int *mpi_size, char 
 
     code = MPI_Get_processor_name(processor_name, &processor_name_len);
     Obradi_rezultat(code);
+
+    initscr();
+    clear();
+    noecho();
+    cbreak();
+    keypad(stdscr, TRUE);
+}
+
+void RenderBoard(WINDOW **polja) {
+    int i=0,j=0;
+
+    for (i=0; i<6; i++)
+        for (j=0; j<7; j++) {
+            box(polja[i+6*j], 0, 0);
+            wrefresh(polja[i+6*j]);
+        }
+
 }
 
 int Iprobe(MPI_Status *status) {
@@ -103,7 +142,7 @@ void Obradi_rezultat(int code) {
     char error_string[MPI_MAX_ERROR_STRING];
 
     if (code != MPI_SUCCESS) {
-	MPI_Error_string(code, error_string, &resultlen);
-	perror(error_string);
+	    MPI_Error_string(code, error_string, &resultlen);
+	    perror(error_string);
     }
 }
