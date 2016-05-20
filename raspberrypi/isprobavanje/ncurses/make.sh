@@ -1,4 +1,6 @@
-for i in {1..28};
+for i in *.c;
 do
-    gcc -lmenu -lform -lncurses -lpanel ncurses_proba$i.c -o proba$i.o; 
+    #echo "compiling $i";
+    output_name=`echo $i | sed -r "s/[a-zA-Z]*([0-9]+)\.c/proba\1.o/"`;
+    gcc -lmenu -lform -lncurses -lpanel $i -o $output_name;
 done
