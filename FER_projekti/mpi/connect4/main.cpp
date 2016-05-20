@@ -45,7 +45,7 @@ int main(int argc, char **argv)
 				cout << "Stupac " << iCol << ", vrijednost: " << dResult << endl;
 			}
 		}
-		iDepth /= 2;	
+		iDepth /= 2;
 	// zasto petlja? ako svi potezi vode u poraz, racunamo jos jednom za duplo manju dubinu
 	// jer igrac mozda nije svjestan mogucnosti pobjede
 	}while(dBest == -1 && iDepth > 0);
@@ -72,7 +72,7 @@ double Evaluate(Board Current, data LastMover, int iLastCol, int iDepth)
 	data NewMover;
 	bool bAllLose = true, bAllWin = true;
 	int iMoves;
-	
+
 	if(Current.GameEnd(iLastCol))	// igra gotova?
 		if(LastMover == CPU)
 			return 1;	// pobjeda
