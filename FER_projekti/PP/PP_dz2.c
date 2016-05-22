@@ -9,7 +9,8 @@
 #define BUFFER_SIZE 10
 
 void Inicijaliziraj(int *argc, char ***argv, int *mpi_rank, int *mpi_size, char *processor_name);
-void RenderBoard(WINDOW **polja);
+WINDOW *Napravi_plocu();
+void RenderBoard(WINDOW *ploca);
 void Obradi_rezultat(int code);
 int Iprobe(MPI_Status *status);
 void Recv(void *buf, MPI_Status *status);
@@ -21,17 +22,19 @@ void Wait(MPI_Request *request, MPI_Status *status);
 int main(int argc, char **argv) {
     int i, j, mpi_rank, mpi_size, key;
     char processor_name[MPI_MAX_PROCESSOR_NAME];
-    WINDOW *polja[42];
+    WINDOW *ploca;
 
     Inicijaliziraj(&argc, &argv, &mpi_rank, &mpi_size, processor_name);
-    /*
-    for (i=0; i<6; i++)
-        for (j=0; j<7; j++) {
-            polja[i+6*j] = newwin(10, 10, 10+10*i, 10+10*j);
-        }
-    */
+	//ploca = Napravi_plocu();
+	refresh();
+	ploca = Napravi_plocu(); 
 
-    RenderBoard(polja);
+	//mvwprintw(ploca, 1,1, "%c", ACS_BLOCK);
+	//wmove(ploca, 1, 1);
+	mvwaddch(ploca, 1, 1, ACS_DIAMOND);
+	wrefresh(ploca);
+	/*
+    RenderBoard(ploca);
 
     while ((key=getch()) != KEY_F(1)) {
         move(0,0);
@@ -43,10 +46,12 @@ int main(int argc, char **argv) {
             case KEY_DOWN:
                 break;
             default:
-                refresh;
+                refresh();
         }
-        RenderBoard(polja);
+        RenderBoard(ploca);
     }
+	*/
+	getch();
     endwin();
     MPI_Finalize();
     return 0;
@@ -77,13 +82,30 @@ void Inicijaliziraj(int *argc, char ***argv, int *mpi_rank, int *mpi_size, char 
     keypad(stdscr, TRUE);
 }
 
-void RenderBoard(WINDOW **polja) {
+WINDOW *Napravi_plocu() {
+	WINDOW *ploca;
+	int i, height, width;
+	//LINES = 24
+	//COLS = 80
+	height = 8+6-1;
+	width = 9+7+6;
+	ploca = newwin(height, width, 2, COLS/2-width/2);
+	box(ploca, 0, 0);
+	for (i=1; i<7; i++) {
+		mvwhline(ploca, height/6*i, 1, ACS_HLINE, width-2);
+		mvwvline(ploca, 1, width/7*i, ACS_VLINE, height-2);
+	}
+	wrefresh(ploca);
+	return ploca;
+}
+
+void RenderBoard(WINDOW *ploca) {
     int i=0,j=0;
 
     for (i=0; i<6; i++)
         for (j=0; j<7; j++) {
-            box(polja[i+6*j], 0, 0);
-            wrefresh(polja[i+6*j]);
+            box(ploca, 0, 0);
+            wrefresh(ploca);
         }
 
 }
