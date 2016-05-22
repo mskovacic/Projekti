@@ -9,34 +9,35 @@ char *choices[] = {
                         "Choice 2",
                         "Choice 3",
                         "Choice 4",
-			"Choice 5",
-			"Choice 6",
-			"Choice 7",
+            			"Choice 5",
+			            "Choice 6",
+			            "Choice 7",
                         "Exit",
                   };
 
 int main()
-{	ITEM **my_items;
-	int c;				
+{
+    ITEM **my_items;
+	int c;
 	MENU *my_menu;
         int n_choices, i;
 	ITEM *cur_item;
-	
-	/* Initialize curses */	
+
+	/* Initialize curses */
 	initscr();
 	start_color();
-        cbreak();
-        noecho();
+    cbreak();
+    noecho();
 	keypad(stdscr, TRUE);
 	init_pair(1, COLOR_RED, COLOR_BLACK);
 	init_pair(2, COLOR_GREEN, COLOR_BLACK);
 	init_pair(3, COLOR_MAGENTA, COLOR_BLACK);
 
 	/* Initialize items */
-        n_choices = ARRAY_SIZE(choices);
-        my_items = (ITEM **)calloc(n_choices + 1, sizeof(ITEM *));
-        for(i = 0; i < n_choices; ++i)
-                my_items[i] = new_item(choices[i], choices[i]);
+    n_choices = ARRAY_SIZE(choices);
+    my_items = (ITEM **)calloc(n_choices + 1, sizeof(ITEM *));
+    for(i = 0; i < n_choices; ++i)
+        my_items[i] = new_item(choices[i], choices[i]);
 	my_items[n_choices] = (ITEM *)NULL;
 	item_opts_off(my_items[3], O_SELECTABLE);
 	item_opts_off(my_items[6], O_SELECTABLE);
@@ -71,11 +72,10 @@ int main()
 				pos_menu_cursor(my_menu);
 				break;
 		}
-	}	
+	}
 	unpost_menu(my_menu);
 	for(i = 0; i < n_choices; ++i)
 		free_item(my_items[i]);
 	free_menu(my_menu);
 	endwin();
 }
-	
