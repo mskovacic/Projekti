@@ -9,6 +9,8 @@
 #define BUFFER_SIZE 10
 
 void Inicijaliziraj(int *argc, char ***argv, int *mpi_rank, int *mpi_size, char *processor_name);
+void Inicijaliziraj_MPI(int *argc, char ***argv, int *mpi_rank, int *mpi_size, char *processor_name);
+void Inicijaliziraj_sucelje();
 WINDOW *Napravi_plocu();
 void RenderBoard(WINDOW *ploca);
 void Obradi_rezultat(int code);
@@ -25,13 +27,21 @@ int main(int argc, char **argv) {
     WINDOW *ploca;
 
     Inicijaliziraj(&argc, &argv, &mpi_rank, &mpi_size, processor_name);
-	//ploca = Napravi_plocu();
 	refresh();
 	ploca = Napravi_plocu(); 
 
 	//mvwprintw(ploca, 1,1, "%c", ACS_BLOCK);
 	//wmove(ploca, 1, 1);
-	mvwaddch(ploca, 1, 1, ACS_DIAMOND);
+	wattron(ploca, COLOR_PAIR(3));
+	//mvwaddch(ploca, 1, 1, ACS_BLOCK);
+	mvwprintw(ploca, 1, 2, " ");
+	wattroff(ploca, COLOR_PAIR(3));
+	wrefresh(ploca);
+	
+	wattron(ploca, COLOR_PAIR(4));
+	//mvwaddch(ploca, 5, 5, ACS_DIAMOND);
+	mvwprintw(ploca, 3, 5, " ");
+	wattroff(ploca, COLOR_PAIR(4));
 	wrefresh(ploca);
 	/*
     RenderBoard(ploca);
@@ -58,7 +68,13 @@ int main(int argc, char **argv) {
 }
 
 void Inicijaliziraj(int *argc, char ***argv, int *mpi_rank, int *mpi_size, char *processor_name) {
-    int code, processor_name_len;
+    
+	Inicijaliziraj_MPI(argc, argv, mpi_rank, mpi_size, processor_name);
+    Inicijaliziraj_sucelje();
+}
+
+void Inicijaliziraj_MPI(int *argc, char ***argv, int *mpi_rank, int *mpi_size, char *processor_name) {
+	int code, processor_name_len;
 
     srand(time(NULL)/(*mpi_rank + 1) + *mpi_rank);
     memset(processor_name, 0, MPI_MAX_PROCESSOR_NAME);
@@ -74,14 +90,21 @@ void Inicijaliziraj(int *argc, char ***argv, int *mpi_rank, int *mpi_size, char 
 
     code = MPI_Get_processor_name(processor_name, &processor_name_len);
     Obradi_rezultat(code);
+}
 
-    initscr();
+void Inicijaliziraj_sucelje() {
+	
+	initscr();
     clear();
     noecho();
     cbreak();
     keypad(stdscr, TRUE);
+	start_color();
+	init_pair(1, COLOR_RED, COLOR_BLACK);
+	init_pair(2, COLOR_YELLOW, COLOR_BLACK);
+	init_pair(3, COLOR_BLACK, COLOR_RED);
+	init_pair(4, COLOR_BLACK, COLOR_YELLOW);
 }
-
 WINDOW *Napravi_plocu() {
 	WINDOW *ploca;
 	int i, height, width;
