@@ -37,21 +37,86 @@ int Zavrsi(MENU *menu, ITEM **items, int n_choices);
 
 int main(int argc, char **argv) {
     int i, j, mpi_rank, mpi_size, key, igra_traje=1, potez, n_choices;
-    char processor_name[MPI_MAX_PROCESSOR_NAME], string[100];
+    char processor_name[MPI_MAX_PROCESSOR_NAME], string[1000];
     WINDOW *ploca, *menu_window;
 	ITEM **items;
 	MENU *menu;
 
-    Inicijaliziraj(&argc, &argv, &mpi_rank, &mpi_size, processor_name);
-	Refresh();
-	ploca = Napravi_plocu(); 
-	menu_window = Napravi_menu(&n_choices, items, menu);
+    Inicijaliziraj_MPI(&argc, &argv, &mpi_rank, &mpi_size, processor_name);
+	if (mpi_rank == 0) {
+		Inicijaliziraj_sucelje();
+		Refresh();
+		ploca = Napravi_plocu(); 
+		menu_window = Napravi_menu(&n_choices, items, menu);
 
-	getnstr(string, 1000);
-	printw("%s\n", string);
-	refresh();
+		/*
+		wattron(ploca, COLOR_PAIR(3));
+		//mvwaddch(ploca, 1, 1, ACS_BLOCK);
+		mvwprintw(ploca, 1, 2, " ");
+		wattroff(ploca, COLOR_PAIR(3));
+		Wrefresh(ploca);
 		
-    return Zavrsi(menu, items, n_choices);
+		wattron(ploca, COLOR_PAIR(4));
+		//mvwaddch(ploca, 5, 5, ACS_DIAMOND);
+		mvwprintw(ploca, 3, 5, " ");
+		wattroff(ploca, COLOR_PAIR(4));
+		Wrefresh(ploca);
+		*/
+		Refresh();
+		potez=POTEZ_HUMAN;
+		while (igra_traje) {
+			igra_traje=0;
+			switch (potez) {
+				case POTEZ_CPU:
+					//printw("CPU na potezu\n");
+					//TODO: DODATI LOGIKU OVDJE
+					potez = POTEZ_HUMAN;
+					break;
+				case POTEZ_HUMAN:
+					//printw("Igracev potez!\nKoristi strelice za odabir stupca");
+					//Refresh();
+					//TODO: DODATI LOGIKU OVDJE
+					while (getnstr(string, 1000)) {
+						//move(0,0);
+						//clear();
+						//Refresh();
+						mvprintw(0,0,"			pritisnut %s", string);
+						/*
+						switch (key) {
+							case KEY_LEFT:
+								menu_driver(menu, REQ_LEFT_ITEM);
+								break;
+							case KEY_RIGHT:
+								menu_driver(menu, REQ_RIGHT_ITEM);
+								break;
+							case 10: //enter
+							{
+								ITEM *cur;
+								cur=current_item(menu);
+							}
+
+							default:
+								Refresh();
+								continue;
+						}
+						*/
+						Wrefresh(menu_window);
+					}
+					potez = POTEZ_CPU;
+					break;
+				default:
+					printw("Došlo je do pogreške!");
+					Refresh();
+			}
+			
+		}
+		
+		printw("Igra je završena!\nPritisnite neku tipku za izlazak...");
+		refresh();
+		Zavrsi(menu, items, n_choices);
+	}
+	Validiraj_MPI(MPI_Finalize());
+    return 0;
 }
 
 void Inicijaliziraj(int *argc, char ***argv, int *mpi_rank, int *mpi_size, char *processor_name) {
@@ -76,9 +141,9 @@ void Inicijaliziraj_sucelje() {
 	
 	initscr();
     clear();
-    Validiraj_ncurses(noecho());
-	cbreak();
-    Validiraj_ncurses(keypad(stdscr, TRUE));
+    //Validiraj_ncurses(noecho());
+	//cbreak();
+    //Validiraj_ncurses(keypad(stdscr, TRUE));
 	Validiraj_ncurses(start_color());
 	init_pair(1, COLOR_RED, COLOR_BLACK);
 	init_pair(2, COLOR_YELLOW, COLOR_BLACK);
@@ -260,6 +325,5 @@ int Zavrsi(MENU *menu, ITEM **items, int n_choices) {
     for(i = 0; i < n_choices; ++i)
         Validiraj_menu(free_item(items[i]));
     Validiraj_ncurses(endwin());
-    Validiraj_MPI(MPI_Finalize());
 	return 0;
 }
