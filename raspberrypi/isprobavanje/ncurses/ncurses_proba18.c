@@ -52,13 +52,16 @@ int main()
 	my_items = (ITEM **)calloc(n_choices + 1, sizeof(ITEM *));
 
 	for(i = 0; i < n_choices; ++i)
-	        my_items[i] = new_item(choices[i], choices[i]);
+		my_items[i] = new_item(choices[i], choices[i]);
 	my_items[n_choices] = (ITEM *)NULL;
 
 	my_menu = new_menu((ITEM **)my_items);
-	mvprintw(LINES - 2, 0, "F1 to Exit");
 	post_menu(my_menu);
+	mvprintw(LINES - 2, 0, "F1 to Exit");
 	refresh();
+	mvprintw(LINES - 3, 0, "Upisi znak:");
+	c=getch();
+	mvprintw(LINES-4,0,"upisan %c",c);
 
 	while((c = getch()) != KEY_F(1))
 	{   switch(c)
