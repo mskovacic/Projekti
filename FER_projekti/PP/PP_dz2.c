@@ -23,6 +23,10 @@ void Nacrtaj_rub(char redak);
 int Ucitaj_potez(char *broj_vrijednosti);
 void Odigraj_potez(char igrac, int potez, char *ploca, char *broj_vrijednosti);
 int Izracunaj_stanje_ploce(char *ploca);
+int Izracunaj_horizontalno_stanje(char *ploca);
+int Izracunaj_vertikalno_stanje(char *ploca);
+int Izracunaj_dijagonalno_gore_stanje(char *ploca);
+int Izracunaj_dijagonalno_dolje_stanje(char *ploca);
 int Iprobe(MPI_Status *status);
 void Recv(void *buf, MPI_Status *status);
 void Send(const void *buf, int dest);
@@ -32,7 +36,7 @@ void Wait(MPI_Request *request, MPI_Status *status);
 void Zavrsi(int code, void *arg);
 
 int main(int argc, char **argv) {
-    int i, j, mpi_rank, mpi_size, igra_traje=1, potez, odigran_potez, arg[2];
+    int i, j, mpi_rank, mpi_size, igra_traje=1, potez, ucitan_potez, arg[2], stanje_ploce;
     char processor_name[MPI_MAX_PROCESSOR_NAME], *ploca, *broj_vrijednosti;
 
     Inicijaliziraj_MPI(&argc, &argv, &mpi_rank, &mpi_size, processor_name);
@@ -55,30 +59,33 @@ int main(int argc, char **argv) {
 				case POTEZ_CPU:
 					printf("CPU na potezu\n");
 					//TODO: DODATI LOGIKU OVDJE
-					//GENERIRAJ ZADATKE
-					//Nađi odigran potez
 					
-					Odigraj_potez(potez, odigran_potez, ploca, broj_vrijednosti);
+					//GENERIRAJ ZADATKE
+					
+					//Nađi najbolji potez
+					
+					Odigraj_potez(potez, ucitan_potez, ploca, broj_vrijednosti);
 					
 					potez = POTEZ_HUMAN;
 					break;
 				case POTEZ_HUMAN:
 					printf("Igračev potez!\n");
 					Nacrtaj_plocu(ploca);
-					printf ("Stanje ploce:%d\n", Izracunaj_stanje_ploce(ploca));
-					odigran_potez = Ucitaj_potez(broj_vrijednosti);
-					//printf ("Odigran je stupac: %d\n", odigran_potez);
-					Odigraj_potez(potez, odigran_potez, ploca, broj_vrijednosti);
-					
+					ucitan_potez = Ucitaj_potez(broj_vrijednosti);
+					Odigraj_potez(potez, ucitan_potez, ploca, broj_vrijednosti);
 					potez = POTEZ_HUMAN; //Treba ispraviti u produkciji
 					break;
 				default:
 					perror("Došlo je do pogreške!");
 			}
-			//TODO: PROVJERI KRAJ IGRE	
+			stanje_ploce=Izracunaj_stanje_ploce(ploca);
+			if (stanje_ploce != 0) {
+				i=system("clear");
+				Nacrtaj_plocu(ploca);
+				printf ("Stanje ploce: %d\n", stanje_ploce);
+				break;
+			}
 		}
-		
-		
 	}
 	printf("Igra je završena!\n");
 	free(ploca);
@@ -149,16 +156,16 @@ void Nacrtaj_rub(char redak) {
 
 int Ucitaj_potez(char *broj_vrijednosti) {
 	int odigran_stupac;
-	char odigran_potez[100];
+	char ucitan_potez[100];
 	
 	while(1){
 		printf("Upisi broj stupca za ubaciti (1-%d):", SIRINA);
-		memset(odigran_potez, 0, 100);
-		if (fgets (odigran_potez, 100, stdin) == NULL) {
+		memset(ucitan_potez, 0, 100);
+		if (fgets (ucitan_potez, 100, stdin) == NULL) {
 			perror("\nIgra nasilno prekinuta! CTRL-D");
 			exit(1);
 		} else {
-			odigran_stupac = atoi(odigran_potez);
+			odigran_stupac = atoi(ucitan_potez);
 			if (odigran_stupac<=SIRINA && odigran_stupac>0) {
 				odigran_stupac--;
 				if (broj_vrijednosti[odigran_stupac]+1<=VISINA) {
@@ -180,10 +187,22 @@ void Odigraj_potez(char igrac, int potez, char *ploca, char *broj_vrijednosti) {
 }
 
 int Izracunaj_stanje_ploce(char *ploca) {
-	char pomocno_polje[SIRINA>VISINA ? SIRINA:VISINA];
-	int i, j, k, br_elemenata;
+	int code;
+	
+	code = Izracunaj_horizontalno_stanje(ploca);
+	if (code != 0) return code;
+	code = Izracunaj_vertikalno_stanje(ploca);
+	if (code != 0) return code;
+	code = Izracunaj_dijagonalno_gore_stanje(ploca);
+	if (code != 0) return code;
+	return Izracunaj_dijagonalno_dolje_stanje(ploca);
+	
+}
 
-	//horizontalno //RADI
+int Izracunaj_horizontalno_stanje(char *ploca) {
+	int i, j, k, br_elemenata;
+	char pomocno_polje[SIRINA>VISINA ? SIRINA:VISINA];
+	
 	for (i=0; i<VISINA; i++) {
 		br_elemenata=0;
 		memset(pomocno_polje, 0, SIRINA>VISINA ? SIRINA:VISINA);
@@ -198,8 +217,13 @@ int Izracunaj_stanje_ploce(char *ploca) {
 		}
 		
 	}
+	return 0;
+}
 
-	//vertikalno //RADI
+int Izracunaj_vertikalno_stanje(char *ploca) {
+	int i, j, k, br_elemenata;
+	char pomocno_polje[SIRINA>VISINA ? SIRINA:VISINA];
+	
 	for (i=0; i<SIRINA; i++) {
 		br_elemenata=0;
 		memset(pomocno_polje, 0, SIRINA>VISINA ? SIRINA:VISINA);
@@ -214,8 +238,13 @@ int Izracunaj_stanje_ploce(char *ploca) {
 		}
 		
 	}
+	return 0;
+}
+
+int Izracunaj_dijagonalno_gore_stanje(char *ploca) {
+	int i, j, k, br_elemenata;
+	char pomocno_polje[SIRINA>VISINA ? SIRINA:VISINA];
 	
-	//dijagonalno gore desno //RADI
 	for (i=VISINA-1; i>=0; i--) {
 		for (j=0; j<SIRINA; j++) {
 			if (i % VISINA == 0 || j % SIRINA == 0) {
@@ -226,7 +255,6 @@ int Izracunaj_stanje_ploce(char *ploca) {
 					br_elemenata++;
 				}
 				if (br_elemenata>=4) {
-					printf("pomocno polje: %s\n", pomocno_polje);
 					if (strstr(pomocno_polje, "XXXX") != NULL) {
 						return 1;
 					} else if (strstr(pomocno_polje, "OOOO") != NULL) {
@@ -236,8 +264,13 @@ int Izracunaj_stanje_ploce(char *ploca) {
 			}
 		}
 	}
+	return 0;
+}
+
+int Izracunaj_dijagonalno_dolje_stanje(char *ploca) {
+	int i, j, k, br_elemenata;
+	char pomocno_polje[SIRINA>VISINA ? SIRINA:VISINA];
 	
-	//dijagonalno dolje desno //RADI
 	for (i=VISINA-1; i>=0; i--) {
 		for (j=SIRINA-1; j>=0; j--) {
 			if (i == VISINA-1 || j % SIRINA == 0) {
