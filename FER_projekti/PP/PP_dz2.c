@@ -4,10 +4,12 @@
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
+#include <math.h>
 
+#define TRAZI_ZADATAK "daj zadatak\0"
 #define VISINA 6
 #define SIRINA 7
-#define BUFFER_SIZE 10
+#define BUFFER_SIZE 15
 #define GORNJI_RED 0
 #define SREDNJI_RED 1
 #define DONJI_RED 2
@@ -18,6 +20,7 @@
 
 void Inicijaliziraj_MPI(int *argc, char ***argv, int *mpi_rank, int *mpi_size, char *processor_name);
 void Validiraj_MPI(int code);
+int Ucitaj_dubinu_pretrazivanja();
 void Nacrtaj_plocu(char *ploca);
 void Nacrtaj_rub(char redak);
 int Ucitaj_potez(char *broj_vrijednosti);
@@ -36,12 +39,12 @@ void Wait(MPI_Request *request, MPI_Status *status);
 void Zavrsi(int code, void *arg);
 
 int main(int argc, char **argv) {
-    int i, j, mpi_rank, mpi_size, igra_traje=1, potez, ucitan_potez, arg[2], stanje_ploce;
-    char processor_name[MPI_MAX_PROCESSOR_NAME], *ploca, *broj_vrijednosti;
+    int i, j, mpi_rank, mpi_size, igra_traje=1, potez, ucitan_potez, arg[2], stanje_ploce, dubina;
+    char processor_name[MPI_MAX_PROCESSOR_NAME], *ploca, *broj_vrijednosti, zadatak[BUFFER_SIZE], poruka[BUFFER_SIZE];
+	MPI_Status status;
 
     Inicijaliziraj_MPI(&argc, &argv, &mpi_rank, &mpi_size, processor_name);
 	
-		
 	if (mpi_rank == 0) {
 		ploca = (char *) calloc(VISINA*SIRINA, sizeof(char));
 		broj_vrijednosti = (char *) calloc(SIRINA, sizeof(char));
@@ -50,8 +53,9 @@ int main(int argc, char **argv) {
 		//arg[0]=(int) ploca;
 		//arg[1]=(int) broj_vrijednosti;
 		//on_exit(Zavrsi, arg);
-		
-		potez=POTEZ_HUMAN;
+		dubina = Ucitaj_dubinu_pretrazivanja();
+				
+		potez=POTEZ_CPU;
 		while (igra_traje) {
 			//igra_traje=0;
 			i=system("clear");
@@ -61,6 +65,25 @@ int main(int argc, char **argv) {
 					//TODO: DODATI LOGIKU OVDJE
 					
 					//GENERIRAJ ZADATKE
+					memset(zadatak, 0, BUFFER_SIZE);
+					for(i=0; i<(int) pow(7, dubina); i++) {
+						for (j=0; j<dubina-1; j++) {
+							if (zadatak[j] >= SIRINA) {
+								zadatak[j] = 0;
+								zadatak[j+1]++;
+							}
+						}
+						//printf ("%d %d %d %d %d\n", zadatak[4], zadatak[3], zadatak[2], zadatak[1], zadatak[0]);
+						//POŠALJI ZADATKE
+						if (Iprobe(&status)) {
+							Recv(poruka, &status);
+							Send(zadatak, status.MPI_SOURCE);
+						}
+						zadatak[0]++;
+					}
+					
+					sleep(10);
+					
 					
 					//Nađi najbolji potez
 					
@@ -86,6 +109,9 @@ int main(int argc, char **argv) {
 				break;
 			}
 		}
+	} else {
+		Send(TRAZI_ZADATAK, 0);
+		Recv(poruka, &status);
 	}
 	printf("Igra je završena!\n");
 	free(ploca);
@@ -104,6 +130,27 @@ void Inicijaliziraj_MPI(int *argc, char ***argv, int *mpi_rank, int *mpi_size, c
     Validiraj_MPI(MPI_Comm_rank(MPI_COMM_WORLD, mpi_rank));
     Validiraj_MPI(MPI_Comm_size(MPI_COMM_WORLD, mpi_size));
     Validiraj_MPI(MPI_Get_processor_name(processor_name, &processor_name_len));
+}
+
+int Ucitaj_dubinu_pretrazivanja() {
+	int dubina;
+	char ucitana_dubina[100];
+	
+	while(1){
+		printf ("Unesi dubinu pretraživanja (>=4):");
+		memset(ucitana_dubina, 0, 100);
+		if (fgets (ucitana_dubina, 100, stdin) == NULL) {
+			perror("\nIgra nasilno prekinuta! CTRL-D");
+			exit(1);
+		} else {
+			dubina = atoi(ucitana_dubina);
+			if (dubina >= 4) {
+				break;
+			}
+			continue;
+		}
+	}
+	return dubina;
 }
 
 void Validiraj_MPI(int code) {
