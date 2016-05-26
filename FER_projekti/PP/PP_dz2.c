@@ -180,9 +180,9 @@ void Odigraj_potez(char igrac, int potez, char *ploca, char *broj_vrijednosti) {
 }
 
 int Izracunaj_stanje_ploce(char *ploca) {
-	char pomocno_polje[SIRINA>VISINA ? SIRINA:VISINA], i, j;
-	int br_elemenata;
-	/*
+	char pomocno_polje[SIRINA>VISINA ? SIRINA:VISINA];
+	int i, j, k, br_elemenata;
+
 	//horizontalno //RADI
 	for (i=0; i<VISINA; i++) {
 		br_elemenata=0;
@@ -198,8 +198,7 @@ int Izracunaj_stanje_ploce(char *ploca) {
 		}
 		
 	}
-	*/
-	/*
+
 	//vertikalno //RADI
 	for (i=0; i<SIRINA; i++) {
 		br_elemenata=0;
@@ -215,44 +214,49 @@ int Izracunaj_stanje_ploce(char *ploca) {
 		}
 		
 	}
-	*/
 	
-	//dijagonalno gore desno //NE RADI
-	for (i=-3; i<SIRINA; i++) {
-		br_elemenata=0;
-		memset(pomocno_polje, 0, SIRINA>VISINA ? SIRINA:VISINA);
-		for (j=0; j<VISINA; j++) {
-			if ((i+j*(SIRINA+1) < SIRINA*VISINA) && (i+j*(SIRINA+1)>0)) {
-				pomocno_polje[br_elemenata]=ploca[i+j*(SIRINA+1)];
-				printf ("%3d", i+j*(SIRINA+1));
-				br_elemenata++;
+	//dijagonalno gore desno //RADI
+	for (i=VISINA-1; i>=0; i--) {
+		for (j=0; j<SIRINA; j++) {
+			if (i % VISINA == 0 || j % SIRINA == 0) {
+				br_elemenata=0;
+				memset(pomocno_polje, 0, SIRINA>VISINA ? SIRINA:VISINA);
+				for (k=0; (i+k<VISINA) && j+k<SIRINA; k++) {
+					pomocno_polje[br_elemenata]=ploca[i*SIRINA+j+k+k*SIRINA];
+					br_elemenata++;
+				}
+				if (br_elemenata>=4) {
+					printf("pomocno polje: %s\n", pomocno_polje);
+					if (strstr(pomocno_polje, "XXXX") != NULL) {
+						return 1;
+					} else if (strstr(pomocno_polje, "OOOO") != NULL) {
+						return -1;
+					}
+				}
 			}
 		}
-		printf ("pomocno_polje: %s\n", pomocno_polje);
-		if (strstr(pomocno_polje, "XXXX") != NULL) {
-			return 1;
-		} else if (strstr(pomocno_polje, "OOOO") != NULL) {
-			return -1;
-		}
 	}
 	
-	/*
-	//dijagonalno dolje desno //NE RADI
-	for (i=SIRINA-1; i>=3; i--) {
-		br_elemenata=0;
-		memset(pomocno_polje, 0, SIRINA>VISINA ? SIRINA:VISINA);
-		for (j=0; j<VISINA; j++) {
-			pomocno_polje[br_elemenata]=ploca[i*SIRINA+j-j*VISINA];
-			br_elemenata++;
-		}
-		printf ("pomocno_polje: %s\n", pomocno_polje);
-		if (strstr(pomocno_polje, "XXXX") != NULL) {
-			return 1;
-		} else if (strstr(pomocno_polje, "OOOO") != NULL) {
-			return -1;
+	//dijagonalno dolje desno //RADI
+	for (i=VISINA-1; i>=0; i--) {
+		for (j=SIRINA-1; j>=0; j--) {
+			if (i == VISINA-1 || j % SIRINA == 0) {
+				br_elemenata=0;
+				memset(pomocno_polje, 0, SIRINA>VISINA ? SIRINA:VISINA);
+				for (k=0; j+k<SIRINA && i-k>=0; k++) {
+					pomocno_polje[br_elemenata]=ploca[i*SIRINA+j+k-k*SIRINA];
+					br_elemenata++;
+				}
+				if (br_elemenata>=4) {
+					if (strstr(pomocno_polje, "XXXX") != NULL) {
+						return 1;
+					} else if (strstr(pomocno_polje, "OOOO") != NULL) {
+						return -1;
+					}
+				}
+			}
 		}
 	}
-	*/
 	return 0;
 }
 
