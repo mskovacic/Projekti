@@ -7,9 +7,10 @@
 #include <math.h>
 
 #define TRAZI_ZADATAK "daj zadatak\0"
+#define NEMA_ZADATAKA "nema zadataka\0"
 #define VISINA 6
 #define SIRINA 7
-#define BUFFER_SIZE 15
+#define BUFFER_SIZE 42
 #define GORNJI_RED 0
 #define SREDNJI_RED 1
 #define DONJI_RED 2
@@ -39,35 +40,49 @@ void Wait(MPI_Request *request, MPI_Status *status);
 void Zavrsi(int code, void *arg);
 
 int main(int argc, char **argv) {
-    int i, j, mpi_rank, mpi_size, igra_traje=1, potez, ucitan_potez, arg[2], stanje_ploce, dubina;
+    int i, j, mpi_rank, mpi_size, igra_traje=1, potez, ucitan_potez, arg[2], stanje_ploce, dubina, ima_zadataka;
     char processor_name[MPI_MAX_PROCESSOR_NAME], *ploca, *broj_vrijednosti, zadatak[BUFFER_SIZE], poruka[BUFFER_SIZE];
 	MPI_Status status;
 
     Inicijaliziraj_MPI(&argc, &argv, &mpi_rank, &mpi_size, processor_name);
 	
 	if (mpi_rank == 0) {
-		ploca = (char *) calloc(VISINA*SIRINA, sizeof(char));
-		broj_vrijednosti = (char *) calloc(SIRINA, sizeof(char));
-		memset(ploca, 46, VISINA*SIRINA);
-		memset(broj_vrijednosti, 0, SIRINA);
-		//arg[0]=(int) ploca;
-		//arg[1]=(int) broj_vrijednosti;
-		//on_exit(Zavrsi, arg);
-		dubina = Ucitaj_dubinu_pretrazivanja();
-				
-		potez=POTEZ_CPU;
-		while (igra_traje) {
-			//igra_traje=0;
+			ploca = (char *) calloc(VISINA*SIRINA, sizeof(char));
+			broj_vrijednosti = (char *) calloc(SIRINA, sizeof(char));
+			memset(ploca, 46, VISINA*SIRINA);
+			memset(broj_vrijednosti, 0, SIRINA);
+			//arg[0]=(int) ploca;
+			//arg[1]=(int) broj_vrijednosti;
+			//on_exit(Zavrsi, arg);
+			dubina = Ucitaj_dubinu_pretrazivanja();
+	}
+	
+	potez=POTEZ_CPU;
+	while (igra_traje) {
+		//igra_traje=0;
+		
+		if (mpi_rank == 0) {
 			i=system("clear");
 			switch (potez) {
 				case POTEZ_CPU:
 					printf("CPU na potezu\n");
 					//TODO: DODATI LOGIKU OVDJE
+					//POŠALJI PLOČU
+					for (i=1; i<mpi_size; i++) {
+						Send(ploca, i);
+					}
+					/*
+					for (i=1; i<mpi_size; i++) {
+						Recv(poruka, &status);
+						printf ("%s %d\n", poruka, status.MPI_SOURCE);
+					}
+					*/
 					
 					//GENERIRAJ ZADATKE
 					memset(zadatak, 0, BUFFER_SIZE);
-					for(i=0; i<(int) pow(7, dubina); i++) {
-						for (j=0; j<dubina-1; j++) {
+					zadatak[BUFFER_SIZE-1]=dubina-2;
+					for(i=0; i<(int) pow(7, 2); i++) {
+						for (j=0; j<2-1; j++) {
 							if (zadatak[j] >= SIRINA) {
 								zadatak[j] = 0;
 								zadatak[j+1]++;
@@ -77,19 +92,24 @@ int main(int argc, char **argv) {
 						//POŠALJI ZADATKE
 						if (Iprobe(&status)) {
 							Recv(poruka, &status);
-							Send(zadatak, status.MPI_SOURCE);
+							if (strstr(poruka, TRAZI_ZADATAK)) {
+								Send(zadatak, status.MPI_SOURCE);
+							}
 						}
 						zadatak[0]++;
 					}
 					
-					sleep(10);
+					for (i=1; i<mpi_size; i++) {
+						Recv(poruka, &status);
+						Send(NEMA_ZADATAKA, status.MPI_SOURCE);
+					}				
 					
 					
 					//Nađi najbolji potez
 					
-					Odigraj_potez(potez, ucitan_potez, ploca, broj_vrijednosti);
-					
-					potez = POTEZ_HUMAN;
+					//Odigraj_potez(potez, ucitan_potez, ploca, broj_vrijednosti);
+					sleep(5);
+					potez = POTEZ_CPU;
 					break;
 				case POTEZ_HUMAN:
 					printf("Igračev potez!\n");
@@ -108,11 +128,22 @@ int main(int argc, char **argv) {
 				printf ("Stanje ploce: %d\n", stanje_ploce);
 				break;
 			}
+		} else {
+			//
+			Recv(poruka, &status);
+			//Nacrtaj_plocu(poruka);
+			ima_zadataka = 1;
+			while (ima_zadataka) {
+				Send(TRAZI_ZADATAK, 0);
+				Recv(poruka, &status);
+				printf("%d primio zadatak: %d %d %d %d\n", mpi_rank, poruka[3], poruka[2], poruka[1], poruka[0]);
+				if (strstr(poruka, NEMA_ZADATAKA)) {
+					ima_zadataka = 0;
+				}
+			}
 		}
-	} else {
-		Send(TRAZI_ZADATAK, 0);
-		Recv(poruka, &status);
 	}
+	
 	printf("Igra je završena!\n");
 	free(ploca);
 	free(broj_vrijednosti);
