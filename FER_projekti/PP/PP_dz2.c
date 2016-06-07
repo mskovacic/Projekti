@@ -140,10 +140,12 @@ int main(int argc, char **argv) {
 			float stanje_ploce;
 			char pom_ploca[SIRINA*VISINA], pom_broj_vrijednosti[SIRINA];
 			
+			
 			Recv(poruka, &status);
 			memcpy(ploca, poruka, SIRINA*VISINA);
 			Recv(poruka, &status);
 			memcpy(broj_vrijednosti, poruka, SIRINA);
+			//Nacrtaj_plocu(poruka);
 
 			ima_zadataka = 1;
 			while (ima_zadataka) {
@@ -157,16 +159,86 @@ int main(int argc, char **argv) {
 				
 				memcpy(pom_ploca, ploca, SIRINA*VISINA);
 				memcpy(pom_broj_vrijednosti, broj_vrijednosti, SIRINA);
-				dubina = poruka[BUFFER_SIZE-1];
 				
-				for (j=0; j<2; i++) {
-					Odigraj_potez(potez, poruka[j], pom_ploca, pom_broj_vrijednosti);
+				dubina = poruka[BUFFER_SIZE-1];
+				stanja = (double *) calloc(dubina, sizeof(double));
+				//suma = (int *) calloc(dubina, sizeof(int));
+				
+				nije_gotovo = 1;
+				while (nije_gotovo) {
+					/*
+					for(i=0; i < (int) pow(7, dubina); i++) {
+						for (j=0; j<dubina-1; j++) {
+							if (zadatak[j] >= SIRINA) {
+								zadatak[j] = 0;
+								zadatak[j+1]++;
+							}
+						}
+						
+						for (j=0; j < dubina; j++) {
+							if (j % 2 == 0) {
+								potez = POTEZ_CPU;
+							} else {
+								potez = POTEZ_HUMAN;
+							}
+							Odigraj_potez(potez, poruka[j], pom_ploca, pom_broj_vrijednosti);
+							
+							stanje = Izracunaj_stanje_ploce(pom_ploca);
+							if (potez == POTEZ_HUMAN && stanje == -1 || potez == POTEZ_CPU && stanje == 1) {
+								stanja[j] = stanje;
+								if (j == 0) {
+									nije_gotovo = 0;
+									break;
+								} else {
+									stanja[j-1] = stanje;
+								}
+							} else {
+								if (j == dubina - 1) {
+									stanja[j] += stanje;
+								}
+							}
+							
+						}
+						
+						if (nije_gotovo == 0) {
+							break;
+						}
+						//IZRAČUNA STANJE
+						
+						//najveća dubina
+						stanje = Izracunaj_stanje_ploce(pom_ploca);
+						suma[i % SIRINA] += stanje;
+						if ((dubina-1) % 2 == 0) {
+								potez = POTEZ_CPU;
+							} else {
+								potez = POTEZ_HUMAN;
+							}
+						
+						zadatak[2]++;
+					}
+					//odigrani su svi potezi
+					
+					if (stanja[0] != 0) {
+						break;
+					} else {
+						//izračunaj vjerojatnosti
+						for (i = dubina-2; i>=0; i--) {
+							if (stanja[i] != 0) {
+								continue;
+							}
+							stanja[i]=(double) stanja[i-1]/SIRINA;
+						}
+					}
+					*/
+					dubina++;
 				}
-				stanje_ploce = Izracunaj_stanje_na_dubini(pom_ploca, pom_broj_vrijednosti, 0, dubina);
-				memset(poruka, 0, BUFFER_SIZE);
-				sprintf(poruka, "%f", stanje_ploce);
-				Send(poruka, 0);
+				
+				//POŠALJI REZULTAT
+
+				//Nacrtaj_plocu(pom_ploca);
+
 			}
+
 		}
 	}
 	
