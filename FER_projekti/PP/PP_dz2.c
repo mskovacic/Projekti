@@ -11,6 +11,7 @@
 #define VISINA 6
 #define SIRINA 7
 #define BUFFER_SIZE VISINA*SIRINA
+#define DUBINA_GLAVNOG 2
 #define GORNJI_RED 0
 #define SREDNJI_RED 1
 #define DONJI_RED 2
@@ -41,7 +42,7 @@ void Wait(MPI_Request *request, MPI_Status *status);
 void Zavrsi(int code, void *arg);
 
 int main(int argc, char **argv) {
-    int i, j, mpi_rank, mpi_size, igra_traje=1, potez, ucitan_potez, stanje_ploce, dubina, ima_zadataka, najbolje, rbr;
+    int i, j, mpi_rank, mpi_size, igra_traje=1, potez, ucitan_potez, stanje_ploce, dubina=4, ima_zadataka, najbolje, rbr;
     char processor_name[MPI_MAX_PROCESSOR_NAME], ploca[VISINA*SIRINA], broj_vrijednosti[SIRINA], zadatak[BUFFER_SIZE], poruka[BUFFER_SIZE], *substring;
 	float stanje_cvora[49];
 	MPI_Status status;
@@ -50,7 +51,7 @@ int main(int argc, char **argv) {
 	
 	if (mpi_rank == 0) {
 			memset(ploca, 46, VISINA*SIRINA);
-			memset(broj_vrijednosti, 0, SIRINA);
+			memset(broj_vrijednosti, 48, SIRINA);
 			dubina = Ucitaj_dubinu_pretrazivanja();
 	}
 	
@@ -71,10 +72,10 @@ int main(int argc, char **argv) {
 					
 					//GENERIRAJ ZADATKE
 					memset(zadatak, 0, BUFFER_SIZE);
-					zadatak[BUFFER_SIZE-1] = dubina-2;
+					zadatak[BUFFER_SIZE-1] = dubina-DUBINA_GLAVNOG;
 					
-					for(i=0; i<(int) pow(7, 2); i++) {
-						for (j=0; j<2-1; j++) {
+					for(i=0; i<(int) pow(7, DUBINA_GLAVNOG); i++) {
+						for (j=0; j<DUBINA_GLAVNOG-1; j++) {
 							if (zadatak[j] >= SIRINA) {
 								zadatak[j] = 0;
 								zadatak[j+1]++;
@@ -86,12 +87,15 @@ int main(int argc, char **argv) {
 							Recv(poruka, &status);
 							if (strstr(poruka, TRAZI_ZADATAK)) {
 								//printf("Saljem zadatak %c %c\n", zadatak[1]+48, zadatak[0]+48);
+								//snprintf(poruka, BUFFER_SIZE, )
 								Send(zadatak, status.MPI_SOURCE);
 							} else {
-								substring = Substring(poruka, 0, 2);
+								substring = Substring(poruka, BUFFER_SIZE-3, 2);
 								rbr = atoi(substring);
 								free(substring);
-								stanje_cvora[rbr] = atof(poruka+2);
+								substring = Substring(poruka, 0, BUFFER_SIZE-2);
+								stanje_cvora[rbr] = atof(substring);
+								free(substring);
 								//printf("stanje %c %f\n",poruka[BUFFER_SIZE-1], stanje_cvora[poruka[BUFFER_SIZE-1]]);
 							}
 						}
@@ -178,7 +182,7 @@ int main(int argc, char **argv) {
 				//sleep(2);
 				stanje_ploce = 12.135f; //Izracunaj_stanje_na_dubini(pom_ploca, pom_broj_vrijednosti, 0, dubina);
 				memset(poruka, 0, BUFFER_SIZE);
-				sprintf(poruka, "%2d%0*f", rbr, BUFFER_SIZE-2, stanje_ploce);
+				sprintf(poruka, "%0*f%2d", BUFFER_SIZE-2, stanje_ploce, rbr);
 				//printf ("stanje ploce %f\n", stanje_ploce);
 				Send(poruka, 0);
 			}
@@ -305,18 +309,18 @@ int Ucitaj_potez(char *broj_vrijednosti) {
 }
 
 int Odigraj_potez(char igrac, int potez, char *ploca, char *broj_vrijednosti) {
-	char simbol;
+	char simbol, polje = broj_vrijednosti[potez]-48;
 	
 	if (potez >= SIRINA) {
 		return 0;
 	}
 	
-	if (broj_vrijednosti[potez] >= VISINA) {
+	if (polje >= VISINA) {
 		return -1;
 	}
 		
 	simbol = igrac == POTEZ_CPU ? 'X' : 'O';
-	ploca[broj_vrijednosti[potez]*SIRINA+potez] = simbol;
+	ploca[polje*SIRINA+potez] = simbol;
 	broj_vrijednosti[potez]++;
 	return 1;
 }
