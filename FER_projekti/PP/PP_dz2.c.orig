@@ -155,8 +155,12 @@ int main(int argc, char **argv) {
 			Nacrtaj_plocu(ploca);
 			Recv(poruka, &status);
 			memcpy(broj_vrijednosti, poruka, SIRINA);
+<<<<<<< HEAD
 			//printf ("Primio vrijednosti!\n");
 			//printf ("%c %c %c %c %c %c %c\n", broj_vrijednosti[6]+48, broj_vrijednosti[5]+48, broj_vrijednosti[4]+48, broj_vrijednosti[3]+48, broj_vrijednosti[2]+48, broj_vrijednosti[1]+48, broj_vrijednosti[0]+48);
+=======
+			//Nacrtaj_plocu(poruka);
+>>>>>>> bf855db6f9aceacc6071396381b1df418a72d5e9
 
 			ima_zadataka = 1;
 			while (ima_zadataka) {
@@ -173,6 +177,7 @@ int main(int argc, char **argv) {
 				memcpy(pom_broj_vrijednosti, broj_vrijednosti, SIRINA);
 				
 				dubina = poruka[BUFFER_SIZE-1];
+<<<<<<< HEAD
 				rbr = poruka[BUFFER_SIZE-2];
 				
 				for (j=0; j<2; j++) {
@@ -187,71 +192,84 @@ int main(int argc, char **argv) {
 				sprintf(poruka, "%0*f%2d", BUFFER_SIZE-2, stanje_ploce, rbr);
 				//printf ("stanje ploce %f\n", stanje_ploce);
 				Send(poruka, 0);
-			}
-		}
-	}
-	
-	printf("Igra je završena!\n");
-	Validiraj_MPI(MPI_Finalize());
-    return 0;
-}
+=======
+				stanja = (double *) calloc(dubina, sizeof(double));
+				//suma = (int *) calloc(dubina, sizeof(int));
+				
+				nije_gotovo = 1;
+				while (nije_gotovo) {
+					/*
+					for(i=0; i < (int) pow(7, dubina); i++) {
+						for (j=0; j<dubina-1; j++) {
+							if (zadatak[j] >= SIRINA) {
+								zadatak[j] = 0;
+								zadatak[j+1]++;
+							}
+						}
+						
+						for (j=0; j < dubina; j++) {
+							if (j % 2 == 0) {
+								potez = POTEZ_CPU;
+							} else {
+								potez = POTEZ_HUMAN;
+							}
+							Odigraj_potez(potez, poruka[j], pom_ploca, pom_broj_vrijednosti);
+							
+							stanje = Izracunaj_stanje_ploce(pom_ploca);
+							if (potez == POTEZ_HUMAN && stanje == -1 || potez == POTEZ_CPU && stanje == 1) {
+								stanja[j] = stanje;
+								if (j == 0) {
+									nije_gotovo = 0;
+									break;
+								} else {
+									stanja[j-1] = stanje;
+								}
+							} else {
+								if (j == dubina - 1) {
+									stanja[j] += stanje;
+								}
+							}
+							
+						}
+						
+						if (nije_gotovo == 0) {
+							break;
+						}
+						//IZRAČUNA STANJE
+						
+						//najveća dubina
+						stanje = Izracunaj_stanje_ploce(pom_ploca);
+						suma[i % SIRINA] += stanje;
+						if ((dubina-1) % 2 == 0) {
+								potez = POTEZ_CPU;
+							} else {
+								potez = POTEZ_HUMAN;
+							}
+						
+						zadatak[2]++;
+					}
+					//odigrani su svi potezi
+					
+					if (stanja[0] != 0) {
+						break;
+					} else {
+						//izračunaj vjerojatnosti
+						for (i = dubina-2; i>=0; i--) {
+							if (stanja[i] != 0) {
+								continue;
+							}
+							stanja[i]=(double) stanja[i-1]/SIRINA;
+						}
+					}
+					*/
+					dubina++;
+				}
+				
+				//POŠALJI REZULTAT
 
-char *Substring(char *string, unsigned int begin, unsigned int length) {
-	char *substring;
-	
-	substring = (char *) calloc(length+1, sizeof(char));
-	memcpy(substring, string + begin, length);
-	substring[length] = '\0';
-	return substring;
-}
+				//Nacrtaj_plocu(pom_ploca);
 
-void Inicijaliziraj_MPI(int *argc, char ***argv, int *mpi_rank, int *mpi_size, char *processor_name) {
-	int processor_name_len;
-
-    srand(time(NULL)/(*mpi_rank + 1) + *mpi_rank);
-    memset(processor_name, 0, MPI_MAX_PROCESSOR_NAME);
-
-    Validiraj_MPI(MPI_Init(argc, argv));
-    Validiraj_MPI(MPI_Comm_rank(MPI_COMM_WORLD, mpi_rank));
-    Validiraj_MPI(MPI_Comm_size(MPI_COMM_WORLD, mpi_size));
-    Validiraj_MPI(MPI_Get_processor_name(processor_name, &processor_name_len));
-}
-
-int Ucitaj_dubinu_pretrazivanja() {
-	int dubina;
-	char ucitana_dubina[100];
-	
-	while(1){
-		printf ("Unesi dubinu pretraživanja (>=4):");
-		memset(ucitana_dubina, 0, 100);
-		if (fgets (ucitana_dubina, 100, stdin) == NULL) {
-			perror("\nIgra nasilno prekinuta! CTRL-D");
-			exit(1);
-		} else {
-			dubina = atoi(ucitana_dubina);
-			if (dubina >= 4) {
-				break;
-			}
-			continue;
-		}
-	}
-	return dubina;
-}
-
-void Validiraj_MPI(int code) {
-    int resultlen;
-    char error_string[MPI_MAX_ERROR_STRING];
-
-    if (code != MPI_SUCCESS) {
-	    MPI_Error_string(code, error_string, &resultlen);
-	    perror(error_string);
-    }
-}
-
-void Nacrtaj_plocu(char *ploca) {
-	int i,j;
-	
-	Nacrtaj_rub(RED_OZNAKE);
+>>>>>>> bf855db6f9aceacc6071396381b1df418a72d5e9
 			}
 
 		}
