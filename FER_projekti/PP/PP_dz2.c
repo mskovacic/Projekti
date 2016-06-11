@@ -151,6 +151,7 @@ int main(int argc, char **argv) {
 							if (najbolje != -1) {
 								break;
 							}
+							printf("Stanje %d: %f\n", i, stanje_cvora[i]);
 						}
 						
 						if (najbolje != -1) {
@@ -166,9 +167,11 @@ int main(int argc, char **argv) {
 							}
 						}
 						
+						//DODATI PROVJERU DA SVI NISU -1
+						
 						code = Odigraj_potez(potez, najbolje, ploca, broj_vrijednosti);
 						printf("%d code\n", code);
-						sleep(1);
+						sleep(5);
 						stanje_cvora[najbolje] = -1.0f;
 					} while (!code);
 					end = clock();
@@ -224,26 +227,26 @@ int main(int argc, char **argv) {
 				
 				i = 0;
 				do {
-				//NAPRAVI KOPIJU PLOCE
-				memcpy(pom_ploca, ploca, SIRINA*VISINA);
-				memcpy(pom_broj_vrijednosti, broj_vrijednosti, SIRINA);
-				code = 1;
-				
-				for (j=0; j<dubina; j++) {
-					potez = j % 2 == 0 ? POTEZ_CPU : POTEZ_HUMAN;
-					code = Odigraj_potez(potez, poruka[BIT_POCETAK_ZADATKA+j], pom_ploca, pom_broj_vrijednosti);
+					//NAPRAVI KOPIJU PLOCE
+					memcpy(pom_ploca, ploca, SIRINA*VISINA);
+					memcpy(pom_broj_vrijednosti, broj_vrijednosti, SIRINA);
+					code = 1;
+					
+					for (j=0; j<dubina; j++) {
+						potez = j % 2 == 0 ? POTEZ_CPU : POTEZ_HUMAN;
+						code = Odigraj_potez(potez, poruka[BIT_POCETAK_ZADATKA+j], pom_ploca, pom_broj_vrijednosti);
+						if (!code) {
+							break;
+						}
+					}
+					
 					if (!code) {
+						stanje_ploce = -1;
 						break;
 					}
-				}
-				
-				if (!code) {
-						stanje_ploce = 1;
-						break;
-				}
-				
-				stanje_ploce = Izracunaj_stanje_na_dubini(pom_ploca, pom_broj_vrijednosti, 0, dubina+i);
-				i++;
+					
+					stanje_ploce = Izracunaj_stanje_na_dubini(pom_ploca, pom_broj_vrijednosti, 0, dubina+i);
+					i++;
 				} while (stanje_ploce == 0);
 				memset(poruka, 0, BUFFER_SIZE);
 				poruka[BIT_TIP_PORUKE] = REZULTAT;
