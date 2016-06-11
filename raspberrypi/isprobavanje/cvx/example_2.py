@@ -1,6 +1,7 @@
 #Total variation in-painting
 #Color Images
 #http://nbviewer.jupyter.org/github/cvxgrp/cvxpy/blob/master/examples/notebooks/WWW/tv_inpainting.ipynb
+#https://github.com/cvxgrp/cvxpy/blob/master/examples/notebooks/WWW/data/lena512.png?raw=true
 
 def display_image(image, name, heigth, width):
 	image = Image.new("RGB", (heigth, width))
