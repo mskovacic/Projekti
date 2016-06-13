@@ -134,45 +134,18 @@ int main(int argc, char **argv) {
 					}
 
 					//Nađi najbolji potez
-					do {
-						najbolje = -1;
-						for (i=0; i<SIRINA; i++) {
-							if (stanje_cvora[i] == 1) {
-								najbolje = i;
-								break;
-							}
-							for (j=0; j<SIRINA; j++) {
-								if (stanje_cvora[SIRINA*j+i] == 1) {
-									najbolje = i;
-									break;
-								}
-								stanje_cvora[i]+=stanje_cvora[SIRINA*j+i];
-							}
-							if (najbolje != -1) {
-								break;
-							}
-							printf("Stanje %d: %f\n", i, stanje_cvora[i]);
-						}
-						
-						if (najbolje != -1) {
-							code = Odigraj_potez(potez, najbolje, ploca, broj_vrijednosti);
-							stanje_cvora[najbolje] = -1.0f;
-							continue;							
-						}
-
-						najbolje = 0;
-						for (i=0; i<SIRINA; i++) {
-							if (stanje_cvora[i] > stanje_cvora[najbolje]) {
+					do {			
+						najbolje=0;
+						for (i=1; i<SIRINA*SIRINA; i++) {
+							if (stanje_cvora[najbolje] < stanje_cvora[i]) {
 								najbolje = i;
 							}
 						}
 						
-						//DODATI PROVJERU DA SVI NISU -1
-						
-						code = Odigraj_potez(potez, najbolje, ploca, broj_vrijednosti);
-						printf("%d code\n", code);
-						sleep(5);
-						stanje_cvora[najbolje] = -1.0f;
+						code = Odigraj_potez(potez, najbolje % SIRINA, ploca, broj_vrijednosti);
+						//printf("%d code\n", code);
+						//sleep(5);
+						stanje_cvora[najbolje] += -1.0f;
 					} while (!code);
 					end = clock();
 					seconds = (float)(end - start) / CLOCKS_PER_SEC;
