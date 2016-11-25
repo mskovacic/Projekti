@@ -43,7 +43,7 @@ for i in xrange(ord('A'), ord('Z')+1):
 	for j in xrange (0, 1000):
 		for k in xrange (0, 10000):
 			for l in xrange(ord('A'), ord('Z')+1):
-				tag = "%s-%3d-%4d-%s" % (i, j, k, l)
+				tag = "%s-%03d-%04d-%s" % (chr(i), j, k, chr(l))
 				url = URL % (tag)
 				print "Working on url: %s" % (url)
 				driver.get(url)
