@@ -11,6 +11,8 @@ v1.1
 
 (c) 2015 Jan Šnajder
 
+
+parallel and concurent programming in haskell - simon marlow
 ==============================================================================
 
 > import Data.Char
@@ -44,6 +46,11 @@ Command ':type' (or ':t') and operator '::'.
 
 Types for numbers, string, lists, tuples...
 
+> f' n 
+> 	| n < 2 = 1
+>	| otherwise = n * f' (n-1)
+>
+
 Functions also have types. E.g., 'lines', 'chr', 'ord', 'toUpper', 'and', 'or'.
 
 It is a good habit always to provide the type of the function (a "type
@@ -54,7 +61,7 @@ should do that before defining the function.
 > addPairs xs = [ x + y | (x, y) <- xs]
 
 > lowerCase :: [Char] -> [Char]
-> lowerCase s = [c | c <- s]
+> lowerCase s = [toLower c | c <- s]
 
 'Char' is equivalent to'String'. E.g.:
 
@@ -107,6 +114,7 @@ However, real Haskellers never do that! Instead, we'll do it as follows:
 This way of defining functions of multiple arguments is called CURRIED FORM
 (writing functions in this way is called CURRYING). We will come back to this
 idea in Lecture 6, when we talk about higher-order functions.
+Schônfinkehization
 
 === EXERCISE 1 ===============================================================
 
@@ -224,6 +232,8 @@ Haskell API search engine):
 
 http://www.haskell.org/hoogle/
 
+hayoo
+
 === EXERCISE 2 ===============================================================
 
 Without using the ':t' command, determine the types of the following 
@@ -241,6 +251,8 @@ functions:
 > foo29 cs = concat [[c1,c2] | c1 <- cs, c2 <- cs]
 
 === IO TYPE ==================================================================
+
+> f''' a = error [chr c | c<-a]
 
 We've mentioned IO functions in Lecture 1 and referred to them as actions. IO
 functions return their value wrapped up in a special type called 'IO a'. Here,
@@ -272,6 +284,10 @@ operations defined by that type class.
 
 Type definitions can have CLASS CONSTRAINTS. We use the symbol '=>' to define
 such.
+
+> fibonacci n	 
+>	| n < 2 = 1
+>	| otherwise = fibonacci (n-1) + fibonacci (n-2)
 
 E.g., the definition of 'elem' function or (==) operator.
 

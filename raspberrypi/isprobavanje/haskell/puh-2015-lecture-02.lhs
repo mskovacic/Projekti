@@ -186,23 +186,38 @@ won't work for all list types (why this is so will be clear after Lecture 3).
 1.1.
 - Define a function that returns a list without the first three elements and 
   last three elements.
+  
+> ret3 l = reverse (drop 3 (reverse (drop 3 l)))
 
 1.2.
 - Define a function 'initals s1 s2' that takes a person's name and a surname 
   as input and returns a string consisting of person's initials.
   initials "James" "Bond" => "J. B."
 
+> initials s1 s2 = take 1 s1 ++ ". " ++ take 1 s2 ++ "."
+  
 1.3.
 - Define a function that concatenates two strings, so that the longest string
   always comes first.
 
+> concat2 s1 s2 
+>	| length s1 > length s2 = s1 ++ s2
+> 	| otherwise = s2 ++ s1
+  
+  
 1.4.
 - Define a function 'safeHead' that returns an empty list if 'l' is an empty
   list, otherwise it returns its first element wrapped inside a singleton list.
 
+> safeHead l 
+>	| null l = []
+>	| otherwise =  [l !! 0]  
+  
 1.5.
 - Define a function 'hasDuplicates' that checks whether a list contains
   duplicate elements (use 'nub').
+  
+> hasDuplicates l = length l /= length (nub l)
 
 === LIST COMPREHENSIONS ======================================================
 
@@ -250,6 +265,14 @@ with strings:
 - Redefine 'ceasarCode n xs' so that it shifts all letters a specified number 
   of positions 'n', converts all input to lowercase, and ensures that letters 
   remain within the ['a'..'z'] interval.
+  
+> caesarCode' n xs = [ (['a'..'z']++['a'..'z']) !! (ord (toLower c) - 97 + (n `mod` length ['a'..'z']))
+> 	   | c <- xs, c /= ' ']
+
+
+> caesarCode'' n xs = [ chr (ord (toLower c) + n)
+>	| c <- xs, c /= ' ']
+
 
 ==============================================================================
 
@@ -281,10 +304,14 @@ Or, more succinctly, using pattern matching:
 - Define 'letterCount' that computes the total number of letters in a string,
   thereby ignoring the whitespaces and all words shorter than three letters.
   You can use 'totalLength'.
+  
+> letterCount xs = totalLength [ x | x <- (words xs), length x > 2]
 
 3.2
 - Redefine 'isPalindrome' so that it's case insensitive and works correctly 
   for strings that contain whitespaces.
+  
+> isPalindrome' xs = [toLower(x) | x<-xs, x /= ' '] == reverse [toLower(x) | x<-xs, x /= ' ']
 
 3.3.
 - Define 'flipp xss' that takes a list of lists, reverts each individual list,
@@ -380,11 +407,18 @@ Zip3:
   (if 'x' appears multiple times, there will be a number of such indices).
   indices 'a' "alphabet" => [1,5]
 
+> indices x xs = [ fst t | t <- index xs, snd t == x]
+>  
+  
 5.2.
 - Define 'showLineNumbers s' that prefixes all lines from string 's' with a
   line number.
   showLineNumbers "first line\nsecond line" => "1 first line\n2 second line\n"
 
+> showLineNumbers s = unlines [ [fst t] ++ " " ++ [snd t]) | t <- index (lines s)]
+>  
+  
+  
 5.3.
 - Define 'haveAlignment xs ys' that returns 'True' if 'xs' and 'ys' have
   any identical elements that are aligned (appear at the same position in
@@ -403,3 +437,5 @@ and type inference system of Haskell.
 To prepare, you may (but need not to) read Chapter 3 of LYH:
 http://learnyouahaskell.com/types-and-typeclasses
 
+fac n 	| n==0 = 1
+		| otherwise = fac (n-1)

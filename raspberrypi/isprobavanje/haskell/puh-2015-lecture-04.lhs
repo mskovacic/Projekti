@@ -205,16 +205,29 @@ Define the following functions using pattern matching.
   If the second element has no head, it takes the head of the third element.
   If none of this works, the function returns an error.
 
+
+> headHunter :: [[a]] -> a  
+> headHunter ([]:[]:(x:_):_) = x
+> headHunter ([]:(x:_):_) = x
+> headHunter ((x:_):_) = x
+> headHunter _ = error "No head"
+
 1.2.
 - Define 'firstColumn m' that returns the first column of a matrix.
   firstColumn [[1,2],[3,4]] => [1,3]
 - Check what happens if the input is not a valid matrix.
+
+> firstColumn :: [[a]] -> [a]
+> firstColumn xss = [ x | (x:_) <- xss]
+
 
 1.3.
 - Define 'shoutOutLoud' that repeats three times the initial letter of each
   word in a string.
   shoutOutLoud :: String -> String
   shoutOutLoud "Is anybody here?" => "IIIs aaanybody hhhere?"
+  
+> shoutOutLoud xs = unwords [x:x:x:s | (x:s) <- words xs ] 
 
 === LOCAL DEFINITIONS (WHERE) ================================================
 
@@ -343,6 +356,14 @@ wherever appropriate.
   and returns both strings capitalized.
   pad :: String -> String -> (String, String)
   pad "elephant" "cat" => ("Elephant", "Cat     ")
+    
+ pad (x:x1) (y:y1) = head [((toUpper x):x1, (toUpper y):y1) |
+  z <- []]
+
+pad (x:xs) (y:ys) = (toUpper x : adjust len xs, toUpper y : adjust len ys)
+  where len = man (length xs) (length ys)
+        adjust n s = s++ replicate (n - length s) ' '
+  
 
 2.2.
 - Define 'quartiles xs' that returns the quartiles (q1,q2,q3) of a given list.
@@ -352,6 +373,8 @@ wherever appropriate.
   quartiles :: [Int] -> (Double,Double,Double)
   quartiles [3,1,2,4,5,6,8,0,7] => (1.5, 4.0, 6.5)
 
+quartiles xs   
+  
 === LET ======================================================================
 
 A 'let-in' statement is similar to a 'where' block. The differences are:
@@ -407,6 +430,19 @@ One more example:
 === EXERCISE 3 ===============================================================
 
 Redo Exercise 2 using 'let' instead of 'where'.
+
+> pad (x:x1) (y:y1) = 
+>  let x2 = (toUpper x):x1
+>      y2 = (toUpper y):y1
+>  in head [( x2 ++ s1, y2 ++ s2) |
+>  z1 <- [0..], 
+>  z2 <- [0..(abs $ length x1 - length y1)],
+>  let s1 = (take z1 $ concat $ repeat " "),
+>  let s2 = (take z2 $ concat $ repeat " "),
+>  let m = x2 ++ s1, 
+>  let n = y2 ++ s2, 
+>  length m == length n]
+  
 
 === CASE =====================================================================
 
