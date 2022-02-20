@@ -1,0 +1,33 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Primjer 1 - WebGL</title>
+    <link href="primjer1.css" rel="stylesheet" />
+    <script src="glMatrix-0.9.5.min.js"></script>
+
+    <!--Shaders-->
+    <script id="shader-vs" type="x-shader/x-vertex">
+        attribute vec3 position;
+
+        uniform mat4 uMVMatrix;
+        uniform mat4 uPMatrix;
+
+        void main(void) {
+            gl_Position = uPMatrix * uMVMatrix * vec4(position, 1.0);
+        }
+    </script>
+
+    <script id="shader-fs" type="x-shader/x-fragment">
+        precision mediump float;
+
+        void main(void) {
+            gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+        }
+    </script>
+</head>
+<body>
+    <h1 align="center">Primjer 1</h1>
+    <canvas id="renderCanvas" width="640" height="480" align="center"></canvas>
+    <script src="primjer1.js"></script>
+</body>
+</html>
