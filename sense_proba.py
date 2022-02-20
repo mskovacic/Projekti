@@ -34,7 +34,7 @@ def HSV_to_RGB(h,s,v):
   b=(b2+m)*255
   return (r,g,b)
 
-def XY_to_HSV(x,y,v=0.5):
+def XY_to_HSV(x,y,v=0.5, k=0):
   pomak_x=4
   pomak_y=4
   x-=pomak_x
@@ -42,21 +42,26 @@ def XY_to_HSV(x,y,v=0.5):
   s=math.pow(x,2)+math.pow(y,2)
   s=math.sqrt(s)/math.sqrt(32)
   h=math.atan2(y,x)
-  h=math.degrees(h)+180
+  h=math.degrees(h) + 180 + k
+  h=h%360
   return (h,s,v)
 
 def main(v):
-	if v is None:
+	if v is None or float(v) > 1 or float(v) < 0:
 		v=0.5
 	else:
 		v=float(v)
 	sense=SenseHat()
-	for i in range(8):
- 		for j in range(8):
-    			(h,s,v)=XY_to_HSV(i,j,v)
-    			(r,g,b)=HSV_to_RGB(h,s,v)
-    			#print (i,j,int(r),int(g),int(b),int(h),int(s),int(v))
-    			sense.set_pixel(i,j,int(r),int(g),int(b))
+	k=0
+	while(True):
+		for i in range(8):
+ 			for j in range(8):
+    				(h,s,v)=XY_to_HSV(i,j,v,k)
+    				(r,g,b)=HSV_to_RGB(h,s,v)
+    				#print (i,j,int(r),int(g),int(b),int(h),int(s),int(v))
+    				sense.set_pixel(i,j,int(r),int(g),int(b))
+		k+=5
+		#time.sleep(0.1)
 
 
 if __name__ == "__main__":
